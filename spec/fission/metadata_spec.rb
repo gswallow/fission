@@ -23,6 +23,7 @@ describe Fission::Metadata do
 
   describe 'delete_vm_restart_document' do
     before do
+      @foo_vm_dir = File.join vm_dir, 'foo.vmwarevm'
       @data = { 'PLRestartDocumentPaths' => ['/vm/foo.vmwarevm', '/vm/bar.vmwarevm']}
       @metadata.content = @data
     end
@@ -47,6 +48,8 @@ describe Fission::Metadata do
 
   describe 'delete_vm_favorite_entry' do
     before do
+      foo_vm_dir = File.join Fission.config['vm_dir'], 'foo.vmwarevm'
+
       @data = { 'VMFavoritesListDefaults2' => [{'path' => '/vm/foo.vmwarevm'}] }
       @metadata.content = @data
     end
@@ -60,6 +63,22 @@ describe Fission::Metadata do
       @metadata.delete_vm_favorite_entry(Fission::VM.new('bar').path)
       @metadata.content.should == @data
     end
+  end
+
+  it 'should ignore VMFavoritesListDefaults2 in Fussion 5' do
+    data = {}
+    @metadata.content = data
+    @metadata.delete_vm_favorite_entry(Fission::VM.new('bar').path)
+    @metadata.content.should == data
+  end
+
+  it 'should remove the vm item from the list in Fussion 5' do
+    foo_vm_dir = File.join Fission.config['vm_dir'], 'foo.vmwarevm'
+    data = {"fusionInitialSessions" => [{"documentPath" => foo_vm_dir}]}
+
+    @metadata.content = data
+    @metadata.delete_vm_favorite_entry(Fission::VM.new('foo').path)
+    @metadata.content.should == { 'fusionInitialSessions' => []}
   end
 
   describe 'self.delete_vm_info' do
