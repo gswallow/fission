@@ -19,9 +19,16 @@ module Fission
     def initialize
       @attributes = {}
 
+      if File.exists?("/Library/Application Support/VMware Fusion/vmrun")
+        @attributes["vmrun_bin"] = "/Library/Application Support/VMware Fusion/vmrun"
+      elsif File.exists?("/Applications/VMware Fusion.app/Contents/Library/vmrun")
+        @attributes["vmrun_bin"] = "/Applications/VMware Fusion.app/Contents/Library/vmrun"
+      elsif
+        raise "Could not find vmrun at standard locations. Probably you don't have VMware fusion installed"
+      end
+
       @attributes['vm_dir'] = File.expand_path('~/Documents/Virtual Machines.localized/')
       @attributes['lease_file'] = '/var/db/vmware/vmnet-dhcpd-vmnet8.leases'
-      @attributes['vmrun_bin'] = '/Library/Application Support/VMware Fusion/vmrun'
       @attributes['plist_file'] = File.expand_path('~/Library/Preferences/com.vmware.fusion.plist')
       @attributes['gui_bin'] = File.expand_path('/Applications/VMware Fusion.app/Contents/MacOS/vmware')
 
